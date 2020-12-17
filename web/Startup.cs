@@ -5,13 +5,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using web.Data;
-using Microsoft.EntityFrameworkCore;
-using web.Models;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+
 
 namespace web
 {
@@ -29,11 +28,12 @@ namespace web
         {
             services.AddControllersWithViews();
 
-            //popravljen user na users
-            //services.AddIdentity<ApplicationUsers, IdentityRole>(options => options.Stores.MaxLengthForKeys = 128).AddEntityFrameworkStores<PlanerContext>().AddDefaultUI().AddDefaultTokenProviders();
-
             services.AddDbContext<PlanerContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("PlanerContext")));
+            options.UseSqlServer(Configuration.GetConnectionString("PlanerContext")));
+
+            //services.AddAuthentication()
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -56,14 +56,11 @@ namespace web
 
             app.UseAuthorization();
 
-           
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
-                
             });
         }
     }

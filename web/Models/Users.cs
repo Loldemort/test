@@ -1,15 +1,18 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace web.Models
 {
     public class Users
     {
-        public int ID { get; set; }
-        public string LastName { get; set; }
-        public string FirstMidName { get; set; }
-        public DateTime LunchTime { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
 
-        public ICollection<Friends> Friends { get; set; }
+        [Key]
+        public int userId { get; set; }
+        public string firstName { get; set; }
+        public string lastName { get; set; }
+        public DateTime lunchTime { get; set; }
     }
 }
