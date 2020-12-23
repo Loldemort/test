@@ -5,11 +5,13 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using web.Data;
+using web.Models;
 
 
 namespace web
@@ -30,8 +32,15 @@ namespace web
 
             services.AddDbContext<PlanerContext>(options =>
             options.UseSqlServer(Configuration.GetConnectionString("PlanerContext")));
-
-            //services.AddAuthentication()
+            services.AddIdentity<ApplicationUser, IdentityRole>(options => options.Stores.MaxLengthForKeys = 128).AddEntityFrameworkStores<PlanerContext>().AddDefaultUI().AddDefaultTokenProviders();
+            
+            services.AddAuthentication()
+            .AddFacebook(facebookOptions =>
+            {
+                facebookOptions.AppId = "378321533466987";
+                facebookOptions.AppSecret = "472cc6290accbdc515ac9e8e10770447";
+                facebookOptions.SaveTokens = true;
+            });
 
 
         }
@@ -54,6 +63,8 @@ namespace web
 
             app.UseRouting();
 
+            
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
@@ -61,6 +72,7 @@ namespace web
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
+                    endpoints.MapRazorPages();
             });
         }
     }
