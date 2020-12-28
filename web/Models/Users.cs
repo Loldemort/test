@@ -10,7 +10,7 @@ namespace web.Models
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
 
         [Key]
-        public int userId { get; set; }
+        public long userId { get; set; }
         public string firstName { get; set; }
         public string lastName { get; set; }
         public DateTime lunchTime { get; set; }
