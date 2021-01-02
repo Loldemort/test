@@ -4,8 +4,28 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Seznam prijateljev</h1>
+<div class="card-columns">
+    @foreach (var user in Model)
+    {
 
+        @if(true){
+        
+            <div class="card">
+            <img class="card-img" style="background-image: url(@user.PictureUrl);">
+            <div class="card-body">
+                <h5 class="card-title">@user.firstName @user.lastName</h5>
+                <h6 class="card-subtitle mb-2 text-muted"> @user.Location</h6>
+               
+                <p class = "card-text">@user.lunchTime.ToString(@"hh\:mm")</p>
+            </div>
+            </div>
+            
+        }
+        
+    }
+</div>
+<!--
 <p>
     <a asp-action="Create">Create New</a>
 </p>
@@ -20,6 +40,12 @@
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.lunchTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Location)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PictureUrl)
             </th>
             <th></th>
         </tr>
@@ -37,6 +63,15 @@
                 @Html.DisplayFor(modelItem => item.lunchTime)
             </td>
             <td>
+                @Html.DisplayFor(modelItem => item.Location)
+            </td>
+            <td>
+                <img src = item.PictureUrl)>
+                @Html.DisplayFor(modelItem => item.PictureUrl)
+            </td>
+
+
+            <td>
                 <a asp-action="Edit" asp-route-id="@item.userId">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.userId">Details</a> |
                 <a asp-action="Delete" asp-route-id="@item.userId">Delete</a>
@@ -45,3 +80,4 @@
 }
     </tbody>
 </table>
+-->

@@ -37,8 +37,8 @@ namespace web
             services.AddAuthentication()
             .AddFacebook(facebookOptions =>
             {
-                facebookOptions.AppId = "378321533466987";
-                facebookOptions.AppSecret = "472cc6290accbdc515ac9e8e10770447";
+                facebookOptions.AppId = "158321669313471";
+                facebookOptions.AppSecret = "c7f7c967e4fb2f56574b02aefbfa71ff";
                 facebookOptions.SaveTokens = true;
             });
 
@@ -71,7 +71,7 @@ namespace web
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=User}/{action=Index}/{id?}");
                     endpoints.MapRazorPages();
             });
         }

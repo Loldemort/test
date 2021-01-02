@@ -9,6 +9,9 @@ using Microsoft.EntityFrameworkCore;
 using web.Data;
 using web.Models;
 using Microsoft.AspNetCore.Identity;
+using System.Net.Http;
+using Newtonsoft.Json;
+
 
 namespace web.Controllers
 {
@@ -18,53 +21,67 @@ namespace web.Controllers
     {
         private readonly PlanerContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        static readonly HttpClient client = new HttpClient();
         private string query;
 
-        public UserController(PlanerContext context, UserManager<ApplicationUser> userManager)
+        public UserController(PlanerContext context, UserManager<ApplicationUser> userManager,SignInManager<ApplicationUser> signInManager)
         {
             _context = context;
             _userManager = userManager;
+            _signInManager = signInManager;
         }
+
+        
 
         // GET: User
         public async Task<IActionResult> Index()
         {
-            //return View(await _context.Users.ToListAsync());
+            
             //get logged in user
             var user = await _userManager.GetUserAsync(User);
             var user1 = await _userManager.GetLoginsAsync(user);
-            //userFacebookId
+           
+            //userFacebookId in Token
             var facebookId = user1[0].ProviderKey;
+            var accessToken = "EAACPZCiLcE78BAMFHdaHpZCsmu6gfyeVMZA1RK2Fzwi6wg59W5nemdo6RJGDvrlXM5VqzZBkOd3PzMjhz4o2JZCLorXDTuhShTIVbEAjnQpPFvcXhhZAy2OZCZBuoPpodJIFZAwc7v9JigYyTY0qPwP4f7cWtdCODPRndB0MiijTWqkhtRpvVv79ZCVVGt6SeuuGjVgrwjv8hE7EhVZCTwZBoEZAd9YZC4lrFmi36215GxYW3gQAZDZD";
 
+            var graphQuery = "https://graph.facebook.com/v9.0/"+facebookId+"?fields=id%"+"2Cname"+"%2Clocation"+"%2Cpicture"+"%2Cfriends"+"&access_token="+accessToken;
+
+            HttpResponseMessage response = await client.GetAsync(graphQuery);
+            response.EnsureSuccessStatusCode();
+            string responseBody = await response.Content.ReadAsStringAsync();
+            
+
+            dynamic facebookData = JsonConvert.DeserializeObject(responseBody);
+
+            var facebookUserName = facebookData.name;
+            var facebeookLocation = facebookData.location.name;
+            var facebookPicture = facebookData.picture.data.url.ToString();
+            //getFriendsId
+            var friendsCount = facebookData.friends.data.Count;
+            var listOfFriends = new List<string>();
+            for (int i = 0; i < friendsCount; i++)
+            {
+                listOfFriends.Add(facebookData.friends.data[i].id.ToString());
+            }
+    
             //create user if he doesn't exist
             if(!UsersExists(Convert.ToInt64(facebookId))){
-        
-                string firstName = user.UserName.Split(".")[0];
-                string  lastName = user.UserName.Split(".")[1].Split("@")[0];
-        
-                var format = "yyyy-MM-dd HH:mm:ss:fff";
-                var stringDate = DateTime.Now.ToString(format);
 
-                query = string.Format("insert into users values ({0},'{1}','{2}','{3}')",facebookId,firstName,lastName,stringDate);
+                //ime, priimek, lokacija
+                string firstName = facebookUserName.ToString().Split(" ")[0];
+                string lastName = facebookUserName.ToString().Split(" ")[1];
+        
+                var format = "HH:mm";
+                //var stringTime = DateTime.Now.ToString(format);
+                var stringTime = DateTime.Now.ToString(format);
+
+                query = string.Format("insert into users values ({0},'{1}','{2}','{3}','{4}','{5}')",facebookId,lastName,firstName,stringTime,facebeookLocation,facebookPicture);
                 await _context.Database.ExecuteSqlCommandAsync(query);
             }
 
-
-
-            //List of friends from facebook query temp
-            var Friend1 = new { Id = 2, Name = "Foo" };
-            var Friend2 = new { Id = 3, Name = "Fai" };
-            var listOfFriends = new[] { Friend1, Friend2 }.ToList(); //get list from facebook
-
-            //Extract friendIDs
-            var friendIdList = new List<long>();
-            foreach (var item in listOfFriends)
-            {
-                friendIdList.Add(item.Id);
-            }
-
-            //Get data from Database
-            query = string.Format("Select * from users where userId IN ({0})",String.Join(",",friendIdList));
+            query = string.Format("Select * from users where userId IN ({0})",String.Join(",",listOfFriends));
             return View(await _context.Users.FromSqlRaw(query).ToListAsync());
 
         }
@@ -131,7 +148,7 @@ namespace web.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(long id, [Bind("userId,firstName,lastName,lunchTime")] Users users)
+        public async Task<IActionResult> Edit(long id, [Bind("userId,firstName,lastName,lunchTime,Location,PictureUrl")] Users users)
         {
             if (id != users.userId)
             {
@@ -187,6 +204,14 @@ namespace web.Controllers
             var users = await _context.Users.FindAsync(id);
             _context.Users.Remove(users);
             await _context.SaveChangesAsync();
+
+            //ob deletu odjavi uporabnika
+            //await _signInManager.SignOutAsync();
+
+            var user = await _userManager.GetUserAsync(User);
+            await _signInManager.SignOutAsync(); 
+            await _userManager.DeleteAsync(user);
+
             return RedirectToAction(nameof(Index));
         }
 

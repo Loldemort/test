@@ -13,6 +13,11 @@ namespace web.Models
         public long userId { get; set; }
         public string firstName { get; set; }
         public string lastName { get; set; }
-        public DateTime lunchTime { get; set; }
+        
+        [DisplayFormat(DataFormatString="{0:hh\\:mm}", ApplyFormatInEditMode = true)]
+        public TimeSpan lunchTime { get; set; }
+        public string Location { get; set; }
+        public string PictureUrl { get; set; }
+        
     }
 }
